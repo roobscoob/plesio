@@ -1,7 +1,12 @@
+pub mod chunking;
 pub mod get_response;
 pub mod select;
 
-use crate::apdu::{command::ApduCommand, iso_7816::class::Iso7816Class, response::ApduResponse};
+use crate::apdu::{
+    command::ApduCommand,
+    iso_7816::{class::Iso7816Class, operation::chunking::CommandChunker},
+    response::ApduResponse,
+};
 
 pub trait Iso7816Operation<'a> {
     type Result;
@@ -10,11 +15,23 @@ pub trait Iso7816Operation<'a> {
     fn parse(self, response: &ApduResponse<'a>) -> Self::Result;
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Iso7816Command<'a> {
     pub(crate) class: Iso7816Class,
     pub(crate) instruction: u8,
     pub(crate) parameters: (u8, u8),
     pub(crate) data: &'a [u8],
+}
+
+impl<'a> Iso7816Command<'a> {
+    pub fn chunk(self, max_size: usize) -> CommandChunker<'a> {
+        CommandChunker {
+            base_command: self,
+            max_size,
+            offset: 0,
+            done: false,
+        }
+    }
 }
 
 impl<'a> ApduCommand for Iso7816Command<'a> {

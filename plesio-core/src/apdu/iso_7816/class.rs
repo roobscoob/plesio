@@ -24,6 +24,38 @@ enum Iso7816ClassState {
     },
 }
 
+impl Iso7816ClassState {
+    pub fn with_chaining(&self) -> Self {
+        match *self {
+            Self::Basic {
+                chaining: _,
+                secure_messaging,
+                basic_channel,
+            } => Self::Basic {
+                chaining: true,
+                secure_messaging,
+                basic_channel,
+            },
+            Self::Extended {
+                chaining: _,
+                is_secure_messaging,
+                extended_channel,
+            } => Self::Extended {
+                chaining: true,
+                is_secure_messaging,
+                extended_channel,
+            },
+        }
+    }
+
+    pub fn is_chaining(&self) -> bool {
+        match *self {
+            Self::Basic { chaining, .. } => chaining,
+            Self::Extended { chaining, .. } => chaining,
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Iso7816Class {
     state: Iso7816ClassState,
@@ -42,6 +74,16 @@ impl Default for Iso7816Class {
 }
 
 impl Iso7816Class {
+    pub fn with_chaining(&self) -> Iso7816Class {
+        Iso7816Class {
+            state: self.state.with_chaining(),
+        }
+    }
+
+    pub fn is_chaining(&self) -> bool {
+        self.state.is_chaining()
+    }
+
     pub fn from_u8(class: u8) -> Option<Self> {
         if class >= 0x80 {
             return None;
