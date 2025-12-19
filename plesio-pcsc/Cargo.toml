@@ -1,0 +1,9 @@
+[package]
+name = "plesio-pcsc"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+pcsc = "2.9"
+plesio-core = { path = "../plesio-core" }
+thiserror = "2.0.17"

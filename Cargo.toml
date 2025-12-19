@@ -1,3 +1,3 @@
 [workspace]
 resolver = "3"
-members = ["plesio-core"]
+members = ["plesio-core", "plesio-pcsc"]
